@@ -25,7 +25,7 @@
 
 ### Accuracy vs. number of samples
 
-![Accuracy vs. number of samples](voting_plot.png)
+![Accuracy vs. number of samples](results/voting_plot.png)
 
 | Samples (k) | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -37,7 +37,7 @@ Voting works, with diminishing returns: accuracy rises quickly up to about 6 sam
 
 I used the number of steps in GSM8K's reference solution as a rough difficulty measure. The comparison here is a single sampled answer vs. a majority vote over 10 samples.
 
-![Accuracy by difficulty](difficulty_plot.png)
+![Accuracy by difficulty](results/difficulty_plot.png)
 
 | Difficulty | Problems | Single sample | Majority vote | Gain |
 | --- | --- | --- | --- | --- |
@@ -80,6 +80,30 @@ Before scaling up, I checked every wrong answer by hand (5/10 correct with greed
 ## Next step
 
 Train or use a **verifier** to pick the best answer from the samples, and compare it with majority voting at the same compute (following Cobbe et al., 2021).
+
+## How to reproduce
+
+```
+src/
+  common.py         model loading, prompt, answer extraction and grading
+  run_baseline.py   greedy baseline (one answer per problem)
+  run_voting.py     sample k answers per problem and take a majority vote
+  analyze.py        plots and error analysis from the saved results (no GPU needed)
+results/            saved answers (JSON) and plots
+```
+
+On Google Colab with a T4 GPU (Runtime → Change runtime type → T4 GPU):
+
+```
+!git clone https://github.com/Iknowitsimpossible/gsm8k-self-consistency.git
+%cd gsm8k-self-consistency
+!pip install -q -r requirements.txt
+!python src/run_baseline.py --n 200     # about 40 minutes
+!python src/run_voting.py --n 200 --k 10 # about 1-2 hours
+!python src/analyze.py
+```
+
+Both run scripts save progress every 10 problems and resume where they stopped if the session disconnects. The original run did not fix a random seed, so a rerun's sampled results will differ slightly from the numbers above.
 
 ## References
 
